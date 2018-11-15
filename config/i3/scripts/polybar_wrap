@@ -1,0 +1,57 @@
+#!/bin/bash
+
+create_bar(){
+polybar $1 &
+BAR_ID=$!
+echo PID = $BAR_ID
+WIN_ID = $(xdotool search --sync --pid $BAR_ID)
+echo WIN_ID > $2
+xdotool windowunmap $WIN_ID
+}
+
+animation_open() {
+    for BAR_ID in $@; do
+        xdotool windowmap $BAR_ID
+    done
+    for y in `seq -300 10 0`; do
+        for BAR_ID in $@; do
+            xdotool windowmove $BAR_ID x $y
+        done
+        sleep 0.001
+    done
+}
+
+animation_close() {
+    for y in `seq 0 -10 -300`; do
+        for BAR_ID in $@; do
+            xdotool windowmove $BAR_ID x $y
+        done
+    done
+    for BAR_ID in $@; do
+        xdotool windowunmap $BAR_ID
+    done
+}
+
+menu_options() {
+	echo -e "\tBack"
+	echo -e "\tLock"
+	echo -e "\tLogout"
+	echo -e "\tShutdown"
+    echo -e "\tScreenshot"
+}
+
+menu_selection() {
+	case "$2" in
+		Lock)
+			~/.i3/scripts/betterlockscreen -l blur
+			;;
+		Logout)
+			i3-msg exit
+			;;
+        Shutdown)
+            # TODO
+            ;;
+        Screenshot)
+            exec scrot -e 'feh $f -x' --delay 1 &
+            ;;
+	esac
